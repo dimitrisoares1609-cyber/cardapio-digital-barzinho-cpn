@@ -1,0 +1,84 @@
+# Sobe o sistema completo com um comando:  docker compose up --build
+#
+#   web      → front-end React servido pelo nginx           http://localhost:8080
+#   api      → API REST + Socket.IO (Node.js/Express)        http://localhost:3333/api/docs
+#   db       → PostgreSQL (dados do cardápio e pedidos)
+#   storage  → RustFS, armazenamento de objetos compatível com S3 (imagens dos itens)
+#
+# Obs.: o RustFS substitui o MinIO, que deixou de publicar imagens Docker gratuitas.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cardapio
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cardapio"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  storage:
+    image: rustfs/rustfs:latest
+    restart: unless-stopped
+    command: ["/data"]
+    environment:
+      RUSTFS_ACCESS_KEY: cardapio
+      RUSTFS_SECRET_KEY: cardapio-segredo-123
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+    volumes:
+      - storagedata:/data
+    ports:
+      - "9000:9000"   # API S3 (as imagens são servidas daqui)
+      - "9001:9001"   # console web do RustFS
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      storage:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      PORT: 3333
+      PUBLIC_URL: http://localhost:8080
+      CORS_ORIGINS: http://localhost:8080,http://localhost:5173
+      TRUST_PROXY: 1
+      DATABASE_URL: postgres://postgres:postgres@db:5432/cardapio
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
+      JWT_EXPIRES_IN: 8h
+      ADMIN_NAME: Administrador
+      ADMIN_EMAIL: admin@barzinhocpn.com.br
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      STORAGE_DRIVER: s3
+      S3_ENDPOINT: http://storage:9000
+      S3_PUBLIC_URL: http://localhost:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: cardapio
+      S3_ACCESS_KEY: cardapio
+      S3_SECRET_KEY: cardapio-segredo-123
+    ports:
+      - "3333:3333"
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
+  storagedata:
