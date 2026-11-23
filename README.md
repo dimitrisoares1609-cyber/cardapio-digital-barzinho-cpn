@@ -161,7 +161,6 @@ docker-compose.yml
 ## Equipe
 
 - Dimitri Soares Lopes
-- [Integrante 2]
-- [Integrante 3]
-- [Integrante 4]
-- [Integrante 5]
+- Rafael Zaporoli Nunes
+- Guilherme Pazoti Neto
+- Rafael Vetrano Cairo
