@@ -6,7 +6,7 @@ O cliente abre o cardápio no celular (pelo QR Code da mesa), escolhe os itens, 
 
 O cardápio cadastrado é o do **Barzinho CPN**, digitado a partir do cardápio físico do bar (87 itens em 7 categorias).
 
-**Vídeo de demonstração:** [`docs/video-demonstracao.mp4`](docs/video-demonstracao.mp4)
+**Vídeo de demonstração:** https://dimitrisoares1609-cyber.github.io/cardapio-digital-barzinho-cpn/ (arquivo em [`docs/video-demonstracao.mp4`](docs/video-demonstracao.mp4))
 
 ## Arquitetura
 
