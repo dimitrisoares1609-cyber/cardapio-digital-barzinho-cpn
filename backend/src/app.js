@@ -16,6 +16,7 @@ import categoriesRoutes from './routes/categories.routes.js';
 import itemsRoutes from './routes/items.routes.js';
 import ordersRoutes from './routes/orders.routes.js';
 import uploadsRoutes from './routes/uploads.routes.js';
+import tablesRoutes from './routes/tables.routes.js';
 
 const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
 
@@ -65,6 +66,7 @@ export function createApp() {
   app.use('/api/items', itemsRoutes);
   app.use('/api/orders', ordersRoutes);
   app.use('/api/uploads', uploadsRoutes);
+  app.use('/api/tables', tablesRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -855,3 +855,67 @@
 .status-filter--cancelado span {
   background: #ececec;
 }
+
+/* Mesas e QR codes */
+.tables-form {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+@media (max-width: 720px) {
+  .tables-form { grid-template-columns: 1fr; }
+}
+.tables-page .form-info {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.qr-sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.qr-card {
+  background: #2b1a10;
+  color: #fff8ea;
+  border: 4px solid #f2a52a;
+  border-radius: 20px;
+  padding: 24px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  break-inside: avoid;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.qr-card__top { display: flex; align-items: center; gap: 10px; }
+.qr-card__top img { width: 40px; height: 40px; }
+.qr-card__top span { font-family: 'Sriracha', cursive; font-size: 1.6rem; color: #f2a52a; }
+.qr-card__mesa { font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem; letter-spacing: 1px; margin-top: 8px; line-height: 1; }
+.qr-card__mesa b { color: #f2a52a; font-weight: 400; }
+.qr-card__qr { background: #fff; border-radius: 12px; padding: 8px; width: 200px; height: 200px; margin-top: 12px; }
+.qr-card__qr svg { width: 100%; height: 100%; display: block; }
+.qr-card__cta { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .5px; margin-top: 14px; }
+.qr-card__sub { font-size: .8rem; opacity: .85; }
+.qr-card__url { font-size: .75rem; color: #f2a52a; margin-top: 12px; letter-spacing: .5px; }
+
+@media print {
+  @page { size: A4; margin: 8mm; }
+  html, body, .admin, .admin-main, .admin-page { background: #fff !important; }
+  .admin-header, .no-print, .toast-region, .toasts { display: none !important; }
+  .admin-main { padding: 0 !important; max-width: none !important; }
+  .admin-page { padding: 0 !important; }
+  .qr-sheet { grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .qr-card { height: 134mm; border-width: 1.2mm; border-radius: 6mm; padding: 7mm 6mm; position: relative; justify-content: flex-start; }
+  .qr-card__top img { width: 11mm; height: 11mm; }
+  .qr-card__top span { font-size: 21pt; }
+  .qr-card__mesa { font-size: 30pt; margin-top: 3mm; }
+  .qr-card__qr { width: 58mm; height: 58mm; padding: 2.5mm; border-radius: 3.5mm; margin-top: 2mm; }
+  .qr-card__cta { font-size: 17pt; margin-top: 4.5mm; }
+  .qr-card__sub { font-size: 9.5pt; }
+  .qr-card__url { position: absolute; bottom: 5mm; font-size: 8.5pt; margin: 0; }
+}

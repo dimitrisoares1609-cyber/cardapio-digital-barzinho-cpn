@@ -11,6 +11,7 @@ import AdminLayout from './pages/admin/AdminLayout.jsx';
 import OrdersPage from './pages/admin/OrdersPage.jsx';
 import MenuAdminPage from './pages/admin/MenuAdminPage.jsx';
 import CategoriesPage from './pages/admin/CategoriesPage.jsx';
+import TablesPage from './pages/admin/TablesPage.jsx';
 
 function NotFound() {
   return (
@@ -53,6 +54,7 @@ export default function App() {
         <Route index element={<OrdersPage />} />
         <Route path="cardapio" element={<MenuAdminPage />} />
         <Route path="categorias" element={<CategoriesPage />} />
+        <Route path="mesas" element={<TablesPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

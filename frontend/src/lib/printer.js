@@ -82,7 +82,7 @@ function receiptHtml(order, width, { reprint = false } = {}) {
     <div class="c small">${esc(order.customerName)} · ${formatDateTime(order.createdAt)}</div>
     <hr>
     ${items}
-    ${order.notes ? `<hr><div class="notes">OBS DO PEDIDO: ${esc(order.notes)}</div>` : ''}
+    ${order.notes ? `<hr><div class="notes">OBS / LOCALIZAÇÃO: ${esc(order.notes)}</div>` : ''}
     <hr>
     <div class="row total"><span>TOTAL</span><span>${formatPrice(order.total)}</span></div>
     <div class="c small" style="margin-top:3mm">Pedido feito pelo cardápio digital</div>

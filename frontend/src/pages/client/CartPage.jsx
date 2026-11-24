@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ShoppingBag, TriangleAlert } from 'lucide-react';
+import { ChevronLeft, QrCode, ShoppingBag, TriangleAlert } from 'lucide-react';
 import EmptyState from '../../components/EmptyState.jsx';
 import ItemImage from '../../components/ItemImage.jsx';
 import QuantityStepper from '../../components/QuantityStepper.jsx';
-import { useCart } from '../../context/CartContext.jsx';
+import { TABLE_QR_TTL, useCart } from '../../context/CartContext.jsx';
 import { useMenu } from '../../context/MenuContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { api } from '../../lib/api.js';
@@ -27,6 +27,8 @@ function validate({ name, table }) {
  */
 export default function CartPage() {
   const { lines, total, customer, setCustomer, setQuantity, remove, clear, reprice } = useCart();
+  // Pedido só sai com o código do QR da mesa, lido nas últimas horas
+  const hasQr = !!customer.tableToken && Date.now() - (customer.tableAt || 0) < TABLE_QR_TTL;
   const { itemsById, loading: menuLoading } = useMenu();
   const toast = useToast();
   const navigate = useNavigate();
@@ -80,6 +82,7 @@ export default function CartPage() {
         body: {
           customerName: customer.name.trim(),
           tableNumber: customer.table.trim(),
+          tableToken: customer.tableToken || null,
           notes: notes.trim() || null,
           items: lines.map((l) => ({ itemId: l.itemId, quantity: l.quantity, options: l.options, notes: l.notes || null })),
         },
@@ -90,6 +93,7 @@ export default function CartPage() {
       clear();
       navigate(`/pedido/${order.trackingCode}`, { replace: true, state: { justCreated: true } });
     } catch (err) {
+      if (err.code === 'TABLE_QR_REQUIRED') setCustomer({ tableToken: null });
       if (err.status === 400) setErrors(err.fieldErrors());
       setSubmitError(err.message);
       toast.show(err.message, { type: 'error' });
@@ -187,6 +191,8 @@ export default function CartPage() {
                 setCustomer({ table: e.target.value });
                 setErrors(({ tableNumber: _removed, ...rest }) => rest);
               }}
+              readOnly={hasQr}
+              title={hasQr ? 'Mesa definida pelo QR code' : undefined}
               inputMode="numeric"
               maxLength={10}
               placeholder="Nº"
@@ -195,9 +201,21 @@ export default function CartPage() {
           </label>
         </div>
         <label className="field">
-          <span className="field__label">Observações do pedido (opcional)</span>
-          <textarea rows={2} maxLength={300} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Ex.: trazer tudo junto" />
+          <span className="field__label">Observações do pedido / Sua localização (referência)</span>
+          <textarea
+            rows={2}
+            maxLength={300}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Ex.: trazer tudo junto · estou perto da TV, de camiseta azul"
+          />
         </label>
+
+        {!hasQr && (
+          <p className="form-info" role="note">
+            <QrCode size={18} aria-hidden="true" /> Para enviar, aponte a câmera do celular para o <b>QR code da sua mesa</b>. Os itens escolhidos continuam aqui.
+          </p>
+        )}
 
         {submitError && (
           <p className="form-error" role="alert">
@@ -205,7 +223,7 @@ export default function CartPage() {
           </p>
         )}
 
-        <button type="submit" className="btn btn--primary btn--block btn--lg" disabled={sending}>
+        <button type="submit" className="btn btn--primary btn--block btn--lg" disabled={sending || !hasQr}>
           {sending ? 'Enviando...' : `Enviar pedido · ${formatPrice(total)}`}
         </button>
         <p className="checkout__hint">O pagamento é feito no caixa. Você acompanha o preparo pelo celular.</p>

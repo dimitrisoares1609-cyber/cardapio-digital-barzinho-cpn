@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { query, withTransaction } from '../db/pool.js';
 import { STATUS_LABELS } from '../schemas.js';
+import { config } from '../config.js';
+import { isValidTableToken } from './tables.service.js';
 import { HttpError } from '../utils/http-error.js';
 
 const round = (value) => Math.round(value * 100) / 100;
@@ -144,6 +146,10 @@ export async function listOrders({ status = [], period = 'today', limit = 200 } 
 }
 
 export async function createOrder(input) {
+  // Só aceita pedido de quem leu a plaquinha oficial da mesa (QR assinado)
+  if (config.tables.required && !isValidTableToken(input.tableNumber, input.tableToken)) {
+    throw new HttpError(403, 'TABLE_QR_REQUIRED', 'Para fazer o pedido, aponte a câmera do celular para o QR code da sua mesa.');
+  }
   const ids = [...new Set(input.items.map((i) => i.itemId))];
   // Item de categoria oculta também não pode ser pedido
   const { rows: menuRows } = await query(

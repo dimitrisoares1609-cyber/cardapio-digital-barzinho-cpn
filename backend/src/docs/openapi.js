@@ -290,6 +290,7 @@ export const openapi = {
         properties: {
           customerName: { type: 'string', minLength: 2, maxLength: 80, example: 'Mariana' },
           tableNumber: { type: 'string', maxLength: 10, example: '7' },
+          tableToken: { type: 'string', description: 'Código assinado que vem no QR code da mesa (parâmetro t do link)', example: 'Xk3...' },
           notes: { type: 'string', maxLength: 300, nullable: true, example: 'Trazer os pratos juntos' },
           items: { type: 'array', minItems: 1, maxItems: 50, items: { $ref: '#/components/schemas/OrderItemInput' } },
         },
@@ -588,6 +589,24 @@ export const openapi = {
       },
     },
 
+    '/api/tables/qrcodes': {
+      post: {
+        tags: ['Mesas'],
+        summary: 'Gera os códigos assinados dos QR codes das mesas',
+        description: 'Usado pelo painel para montar as plaquinhas. Cada mesa recebe um token calculado com a chave secreta do servidor.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { example: { tables: ['1', '2', '3', 'Balcão'] } } },
+        },
+        responses: {
+          200: { description: 'Mesas com o token de cada uma', content: { 'application/json': { example: { tables: [{ table: '1', token: 'q8Zr...' }] } } } },
+          400: { $ref: '#/components/responses/ValidationError' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+
     '/api/uploads': {
       post: {
         tags: ['Upload'],
@@ -625,7 +644,8 @@ export const openapi = {
         summary: 'Cliente envia um pedido',
         description:
           'O preço de cada item é recalculado no servidor a partir do cardápio (o navegador não define preço). ' +
-          'Grava o pedido com status "recebido", registra no histórico e notifica o painel em tempo real (`order:created`).',
+          'Grava o pedido com status "recebido", registra no histórico e notifica o painel em tempo real (`order:created`). ' +
+          'Exige o tableToken do QR code oficial da mesa: sem ele (ou com mesa trocada) a resposta é 403.',
         requestBody: {
           required: true,
           content: {
@@ -634,6 +654,7 @@ export const openapi = {
               example: {
                 customerName: 'Mariana',
                 tableNumber: '7',
+                tableToken: 'código-do-qr-da-mesa',
                 notes: 'Trazer os pratos juntos',
                 items: [
                   { itemId: 1, quantity: 2, options: { tamanho: 'g600' } },
@@ -649,6 +670,7 @@ export const openapi = {
             content: { 'application/json': { schema: { type: 'object', properties: { order: { $ref: '#/components/schemas/Order' } } } } },
           },
           400: { $ref: '#/components/responses/ValidationError' },
+          403: errorResponse('Pedido sem o QR code da mesa', error('TABLE_QR_REQUIRED', 'Para fazer o pedido, aponte a câmera do celular para o QR code da sua mesa.')),
           422: { $ref: '#/components/responses/Unprocessable' },
           429: errorResponse('Muitos pedidos seguidos do mesmo IP', error('TOO_MANY_REQUESTS', 'Muitos pedidos em sequência. Aguarde um pouco.')),
         },

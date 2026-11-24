@@ -61,7 +61,17 @@ function reducer(state, action) {
   }
 }
 
-const initialState = () => load(STORAGE_KEY, { lines: [], customer: { name: '', table: '' } });
+// O código do QR da mesa vale por 6 horas; depois o cliente precisa ler a plaquinha de novo
+export const TABLE_QR_TTL = 6 * 60 * 60 * 1000;
+
+const initialState = () => {
+  const state = load(STORAGE_KEY, { lines: [], customer: { name: '', table: '' } });
+  const c = state.customer || {};
+  if (c.tableToken && !(Date.now() - (c.tableAt || 0) < TABLE_QR_TTL)) {
+    state.customer = { ...c, table: '', tableToken: null, tableAt: 0 };
+  }
+  return state;
+};
 
 export function CartProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);

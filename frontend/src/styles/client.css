@@ -792,12 +792,7 @@
 .step--current .step__icon {
   background: var(--red);
   color: #fff;
-  animation: current-pulse 1.8s infinite;
-}
-
-@keyframes current-pulse {
-  0% { box-shadow: 0 0 0 0 rgb(179 32 42 / 0.45); }
-  80%, 100% { box-shadow: 0 0 0 12px rgb(179 32 42 / 0); }
+  box-shadow: 0 0 0 5px rgb(179 32 42 / 0.15);
 }
 
 .step__label {

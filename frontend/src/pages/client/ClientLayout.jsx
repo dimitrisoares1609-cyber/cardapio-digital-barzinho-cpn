@@ -12,11 +12,17 @@ export default function ClientLayout() {
   const [bump, setBump] = useState(false);
   const lastCount = useRef(count);
 
-  // QR Code da mesa: /?mesa=7 já preenche o número da mesa no pedido
+  // QR Code da mesa: /?mesa=7&t=<código> preenche a mesa e guarda o código assinado da plaquinha
   useEffect(() => {
     const mesa = params.get('mesa');
-    if (mesa && mesa !== customer.table) setCustomer({ table: mesa.slice(0, 10) });
-  }, [params, customer.table, setCustomer]);
+    const token = params.get('t');
+    if (!mesa) return;
+    if (mesa !== customer.table || token !== customer.tableToken) {
+      setCustomer({ table: mesa.slice(0, 10), tableToken: token || null, tableAt: Date.now() });
+    }
+    // Tira o código da barra de endereço (não fica no histórico nem é compartilhado sem querer)
+    if (token) window.history.replaceState(null, '', window.location.pathname);
+  }, [params, customer.table, customer.tableToken, setCustomer]);
 
   // Animação no contador sempre que um item é adicionado (feedback visual)
   useEffect(() => {

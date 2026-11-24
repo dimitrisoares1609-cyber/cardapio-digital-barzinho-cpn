@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { BookOpen, KeyRound, LayoutGrid, ListOrdered, LogOut, Printer, Tags, Volume2, VolumeX } from 'lucide-react';
+import { BookOpen, KeyRound, LayoutGrid, ListOrdered, LogOut, Printer, QrCode, Tags, Volume2, VolumeX } from 'lucide-react';
 import Brand from '../../components/Brand.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -120,6 +120,9 @@ export default function AdminLayout() {
             </NavLink>
             <NavLink to="/admin/categorias" className="admin-nav__link">
               <Tags size={18} /> Categorias
+            </NavLink>
+            <NavLink to="/admin/mesas" className="admin-nav__link">
+              <QrCode size={18} /> Mesas
             </NavLink>
             <a href={`${API_URL}/api/docs`} target="_blank" rel="noreferrer" className="admin-nav__link">
               <BookOpen size={18} /> API

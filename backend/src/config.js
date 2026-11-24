@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import dotenv from 'dotenv';
 
 dotenv.config({ quiet: true });
@@ -48,6 +49,16 @@ export const config = {
       // endereço que o navegador usa para baixar as imagens (pode ser diferente do endpoint interno)
       publicUrl: (process.env.S3_PUBLIC_URL || process.env.S3_ENDPOINT || '').replace(/\/$/, ''),
     },
+  },
+
+  tables: {
+    // Chave dos QR codes das mesas. Se não for definida, é derivada do JWT_SECRET (fica estável no servidor).
+    // Trocar essa chave invalida todas as plaquinhas impressas.
+    get secret() {
+      return process.env.TABLE_SECRET || createHmac('sha256', String(process.env.JWT_SECRET || 'dev')).update('qr-mesas-v1').digest('hex');
+    },
+    // Exigir QR da mesa para fazer pedido (padrão: sim). TABLE_QR_REQUIRED=false desliga.
+    required: process.env.TABLE_QR_REQUIRED !== 'false',
   },
 
   establishmentName: process.env.ESTABLISHMENT_NAME || 'Barzinho CPN',

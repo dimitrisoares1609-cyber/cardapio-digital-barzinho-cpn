@@ -116,6 +116,7 @@ export const orderBody = z.object({
     z.string({ error: 'Informe o número da mesa' }).trim().min(1, 'Informe o número da mesa').max(10),
   ),
   notes: optionalText(300),
+  tableToken: z.string().trim().max(64).optional().nullable(),
   items: z
     .array(
       z.object({
@@ -145,4 +146,12 @@ export const ordersQuery = z.object({
 
 export const trackingParam = z.object({
   code: z.uuid('Código de acompanhamento inválido'),
+});
+
+// Gera os QR codes das mesas (painel)
+export const tablesBody = z.object({
+  tables: z
+    .array(z.string().trim().min(1, 'Mesa sem nome').max(10, 'Use no máximo 10 caracteres por mesa'))
+    .min(1, 'Informe pelo menos uma mesa')
+    .max(200, 'No máximo 200 mesas por vez'),
 });
