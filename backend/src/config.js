@@ -21,6 +21,8 @@ export const config = {
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean),
+  // base dos links das imagens enviadas; vazio = caminho relativo (/uploads/...), que funciona em qualquer domínio
+  mediaBaseUrl: (process.env.MEDIA_BASE_URL ?? process.env.PUBLIC_URL ?? `http://localhost:${port}`).replace(/\/$/, ''),
 
   databaseUrl: required('DATABASE_URL', 'postgres://postgres:postgres@localhost:5432/cardapio'),
 

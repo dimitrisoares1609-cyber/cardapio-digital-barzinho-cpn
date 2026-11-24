@@ -37,11 +37,11 @@ class LocalStorage {
     await mkdir(UPLOAD_DIR, { recursive: true });
     const key = `${randomUUID()}.${EXTENSIONS[mimeType]}`;
     await writeFile(path.join(UPLOAD_DIR, key), buffer);
-    return { key, url: `${config.publicUrl}/uploads/${key}` };
+    return { key, url: `${config.mediaBaseUrl}/uploads/${key}` };
   }
 
   async remove(url) {
-    const prefix = `${config.publicUrl}/uploads/`;
+    const prefix = `${config.mediaBaseUrl}/uploads/`;
     if (!url?.startsWith(prefix)) return;
     const key = path.basename(url.slice(prefix.length));
     await unlink(path.join(UPLOAD_DIR, key)).catch(() => {});

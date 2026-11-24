@@ -164,3 +164,18 @@ docker-compose.yml
 - Rafael Zaporoli Nunes
 - Guilherme Pazoti Neto
 - Rafael Vetrano Cairo
+
+## Publicação em produção (VPS)
+
+O projeto roda em uma VPS Linux com Docker. O `docker-compose.prod.yml` sobe o banco, a API, o front e o **Caddy**, que gera o certificado HTTPS sozinho.
+
+```bash
+git clone https://github.com/dimitrisoares1609-cyber/cardapio-digital-barzinho-cpn.git /opt/cardapio
+cd /opt/cardapio
+./deploy/deploy.sh                # primeira vez: cria o .env com senhas aleatórias
+./deploy/deploy.sh meudominio.com # depois de apontar o domínio para o IP da VPS
+```
+
+Para atualizar depois de um novo commit: `git pull && ./deploy/deploy.sh`. O backup diário do banco fica em `deploy/backup.sh`.
+
+O cardápio também é um **app instalável (PWA)**: no celular, abra o site e toque em "Adicionar à tela inicial".

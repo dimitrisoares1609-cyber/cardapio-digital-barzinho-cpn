@@ -1,0 +1,5 @@
+# HTTPS automático para todos os endereços listados em SITE_ADDRESSES (separados por vírgula)
+{$SITE_ADDRESSES} {
+	encode zstd gzip
+	reverse_proxy web:80
+}
