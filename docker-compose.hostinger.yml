@@ -1,5 +1,5 @@
 # Implantação pelo Gerenciador Docker da Hostinger ("Compose a partir de URL").
-# Não precisa clonar o repositório: o Docker baixa o código direto do GitHub para montar as imagens.
+# As imagens da API e do front são montadas pelo GitHub Actions a cada push (ghcr.io).
 #
 #   secrets → na primeira vez gera senhas aleatórias (banco, JWT, painel) num volume privado
 #   caddy   → HTTPS automático (Let's Encrypt) para os endereços em SITE_ADDRESSES
@@ -8,7 +8,7 @@
 #   db      → PostgreSQL (sem porta exposta)
 #
 # A senha do painel (/admin) aparece no log do container "api" ao iniciar.
-# Para publicar uma versão nova: suba o código no GitHub, troque a tag das imagens (v2 → v3) e reimplante.
+# Para publicar uma versão nova: suba o código no GitHub, espere o Actions terminar e clique em "Atualizar".
 
 
 services:
@@ -46,9 +46,8 @@ services:
       retries: 30
 
   api:
-    image: barcpn-api:v2
-    build:
-      context: https://github.com/dimitrisoares1609-cyber/cardapio-digital-barzinho-cpn.git#main:backend
+    image: ghcr.io/dimitrisoares1609-cyber/barcpn-api:latest
+    pull_policy: always
     restart: unless-stopped
     depends_on:
       db:
@@ -82,9 +81,8 @@ services:
       - secrets:/secrets:ro
 
   web:
-    image: barcpn-web:v2
-    build:
-      context: https://github.com/dimitrisoares1609-cyber/cardapio-digital-barzinho-cpn.git#main:frontend
+    image: ghcr.io/dimitrisoares1609-cyber/barcpn-web:latest
+    pull_policy: always
     restart: unless-stopped
     depends_on:
       - api
