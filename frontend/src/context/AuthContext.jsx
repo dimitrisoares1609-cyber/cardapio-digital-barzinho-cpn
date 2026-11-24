@@ -43,6 +43,14 @@ export function AuthProvider({ children }) {
     return next;
   }, []);
 
+  // Atualiza o token (ex.: depois de trocar a senha)
+  const updateSession = useCallback((token, admin) => {
+    const next = { token, admin };
+    setAuthToken(token);
+    save(STORAGE_KEY, next);
+    setSession(next);
+  }, []);
+
   // Qualquer 401 em rota protegida encerra a sessão e volta para o login
   useEffect(() => onUnauthorized(() => logout('expired')), [logout]);
 
@@ -61,8 +69,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ token: session?.token ?? null, admin: session?.admin ?? null, isAuthenticated: !!session, expired, login, logout }),
-    [session, expired, login, logout],
+    () => ({ token: session?.token ?? null, admin: session?.admin ?? null, isAuthenticated: !!session, expired, login, logout, updateSession }),
+    [session, expired, login, logout, updateSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

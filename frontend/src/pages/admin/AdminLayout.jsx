@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { BookOpen, LayoutGrid, ListOrdered, LogOut, Printer, Tags, Volume2, VolumeX } from 'lucide-react';
+import { BookOpen, KeyRound, LayoutGrid, ListOrdered, LogOut, Printer, Tags, Volume2, VolumeX } from 'lucide-react';
 import Brand from '../../components/Brand.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { API_URL, api } from '../../lib/api.js';
 import { getPrinterSettings, printOrder, wasPrinted } from '../../lib/printer.js';
 import PrinterSettingsModal from './PrinterSettingsModal.jsx';
+import ChangePasswordModal from './ChangePasswordModal.jsx';
 import { createAdminSocket } from '../../lib/socket.js';
 import { playNewOrderSound } from '../../lib/sound.js';
 import { load, save } from '../../lib/storage.js';
@@ -28,6 +29,7 @@ export default function AdminLayout() {
   const [unseen, setUnseen] = useState(0);
   const [printer, setPrinter] = useState(getPrinterSettings);
   const [printerOpen, setPrinterOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const soundRef = useRef(soundOn);
   const printerRef = useRef(printer);
   printerRef.current = printer;
@@ -139,6 +141,9 @@ export default function AdminLayout() {
             <button type="button" className="icon-btn icon-btn--light" onClick={toggleSound} aria-label={soundOn ? 'Desativar som' : 'Ativar som'} title={soundOn ? 'Som ligado' : 'Som desligado'}>
               {soundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
+            <button type="button" className="icon-btn icon-btn--light" onClick={() => setPasswordOpen(true)} aria-label="Trocar senha" title="Trocar senha">
+              <KeyRound size={20} />
+            </button>
             <span className="admin-user" title={admin?.email}>
               {admin?.name}
             </span>
@@ -150,6 +155,7 @@ export default function AdminLayout() {
         <main className="admin-main">
           <Outlet />
         </main>
+        <ChangePasswordModal open={passwordOpen} onClose={() => setPasswordOpen(false)} />
         <PrinterSettingsModal open={printerOpen} onClose={() => setPrinterOpen(false)} settings={printer} onChange={setPrinter} />
       </div>
     </AdminContext.Provider>

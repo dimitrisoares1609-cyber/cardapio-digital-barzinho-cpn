@@ -879,3 +879,4 @@ img {
     transform: none;
   }
 }
+.status-badge--cancelado { background: #ececec; color: #6b6b6b; text-decoration: line-through; }

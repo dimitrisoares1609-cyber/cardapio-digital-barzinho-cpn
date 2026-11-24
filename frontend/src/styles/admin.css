@@ -845,3 +845,13 @@
   padding: 1px 5px;
   border-radius: 4px;
 }
+
+.order-card--cancelado {
+  opacity: 0.6;
+}
+.order-card--cancelado .order-card__number {
+  text-decoration: line-through;
+}
+.status-filter--cancelado span {
+  background: #ececec;
+}

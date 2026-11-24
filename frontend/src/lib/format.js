@@ -22,10 +22,16 @@ export const STATUS = [
   { id: 'entregue', label: 'Entregue', action: null },
 ];
 
-export const statusLabel = (id) => STATUS.find((s) => s.id === id)?.label ?? id;
+// Todos os status, incluindo "cancelado" (fora do fluxo normal)
+export const ALL_STATUS = [...STATUS, { id: 'cancelado', label: 'Cancelado', action: null }];
+
+export const isClosed = (id) => id === 'entregue' || id === 'cancelado';
+
+export const statusLabel = (id) => ALL_STATUS.find((s) => s.id === id)?.label ?? id;
 
 export function nextStatus(id) {
   const index = STATUS.findIndex((s) => s.id === id);
+  if (index < 0) return null;
   return STATUS[index + 1]?.id ?? null;
 }
 

@@ -1,12 +1,13 @@
 import { z } from 'zod';
 
-export const ORDER_STATUSES = ['recebido', 'em_preparo', 'pronto', 'entregue'];
+export const ORDER_STATUSES = ['recebido', 'em_preparo', 'pronto', 'entregue', 'cancelado'];
 
 export const STATUS_LABELS = {
   recebido: 'Recebido',
   em_preparo: 'Em preparo',
   pronto: 'Pronto',
   entregue: 'Entregue',
+  cancelado: 'Cancelado',
 };
 
 const optionalText = (max) =>
@@ -22,6 +23,16 @@ export const idParam = z.object({
 });
 
 // ---------- Auth ----------
+
+export const passwordBody = z
+  .object({
+    currentPassword: z.string().min(1, 'Informe a senha atual'),
+    newPassword: z
+      .string()
+      .min(10, 'A nova senha precisa ter pelo menos 10 caracteres')
+      .max(100, 'A nova senha pode ter no máximo 100 caracteres'),
+  })
+  .refine((d) => d.newPassword !== d.currentPassword, { message: 'A nova senha deve ser diferente da atual', path: ['newPassword'] });
 
 export const loginBody = z.object({
   email: z.string().trim().toLowerCase().email('Informe um e-mail válido'),

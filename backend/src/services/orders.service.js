@@ -145,7 +145,11 @@ export async function listOrders({ status = [], period = 'today', limit = 200 } 
 
 export async function createOrder(input) {
   const ids = [...new Set(input.items.map((i) => i.itemId))];
-  const { rows: menuRows } = await query('SELECT * FROM menu_items WHERE id = ANY($1)', [ids]);
+  // Item de categoria oculta também não pode ser pedido
+  const { rows: menuRows } = await query(
+    'SELECT m.*, (m.available AND c.active) AS orderable FROM menu_items m JOIN categories c ON c.id = m.category_id WHERE m.id = ANY($1)',
+    [ids],
+  );
   const menuById = new Map(menuRows.map((m) => [m.id, m]));
 
   const lines = input.items.map((line) => {
@@ -153,7 +157,7 @@ export async function createOrder(input) {
     if (!menuItem) {
       throw HttpError.unprocessable(`Item ${line.itemId} não existe mais no cardápio`);
     }
-    if (!menuItem.available) {
+    if (!menuItem.orderable) {
       throw HttpError.unprocessable(`${menuItem.name} está indisponível no momento`);
     }
     const { unitPrice, options } = priceWithOptions(menuItem, line.options);

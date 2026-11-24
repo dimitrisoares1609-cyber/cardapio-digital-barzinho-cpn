@@ -26,12 +26,18 @@ export function initRealtime(httpServer) {
     cors: { origin: config.corsOrigins },
   });
 
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     // O painel envia o JWT no handshake: io(url, { auth: { token } })
-    const admin = socket.handshake.auth?.token ? verifyToken(socket.handshake.auth.token) : null;
+    const token = socket.handshake.auth?.token;
+    const admin = typeof token === 'string' ? await verifyToken(token).catch(() => null) : null;
     if (admin) {
       socket.data.admin = admin;
       socket.join('admins');
+      socket.join(`admin:${admin.id}`);
+      // Derruba a conexão quando o token vence (o painel faz login de novo)
+      const ms = admin.exp * 1000 - Date.now();
+      const timer = setTimeout(() => socket.disconnect(true), Math.max(0, Math.min(ms, 2 ** 31 - 1)));
+      socket.on('disconnect', () => clearTimeout(timer));
     }
 
     // Cliente pede para acompanhar um pedido pelo código recebido na confirmação
@@ -52,6 +58,11 @@ export function initRealtime(httpServer) {
   });
 
   return io;
+}
+
+// Encerra as conexões em tempo real de um admin (ex.: depois de trocar a senha)
+export function disconnectAdminSockets(adminId) {
+  io?.in(`admin:${adminId}`).disconnectSockets(true);
 }
 
 export function emitOrderCreated(order) {

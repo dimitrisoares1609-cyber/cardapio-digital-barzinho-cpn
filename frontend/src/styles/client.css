@@ -923,3 +923,10 @@
 .my-order__info strong {
   color: var(--ink);
 }
+
+.tracking__message--cancel {
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 12px;
+  padding: 12px 14px;
+}

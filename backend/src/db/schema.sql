@@ -79,3 +79,11 @@ CREATE TABLE IF NOT EXISTS order_status_history (
 );
 
 CREATE INDEX IF NOT EXISTS idx_status_history_order ON order_status_history(order_id);
+
+-- ===== Atualizações de segurança =====
+-- Pedido cancelado (pedido falso, trote ou desistência)
+ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check;
+ALTER TABLE orders ADD CONSTRAINT orders_status_check
+  CHECK (status IN ('recebido', 'em_preparo', 'pronto', 'entregue', 'cancelado'));
+-- Troca de senha invalida as sessões abertas em outros aparelhos
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMPTZ NOT NULL DEFAULT now();

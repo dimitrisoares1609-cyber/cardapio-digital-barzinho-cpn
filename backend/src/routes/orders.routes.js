@@ -11,7 +11,7 @@ const router = Router();
 // Limite folgado: no bar vários clientes podem sair pelo mesmo IP (Wi-Fi da casa)
 const createLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  limit: 100,
+  limit: 60,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   handler: (_req, res) =>

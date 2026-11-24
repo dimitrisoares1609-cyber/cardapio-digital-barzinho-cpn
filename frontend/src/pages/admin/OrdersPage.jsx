@@ -6,7 +6,7 @@ import StatusBadge from '../../components/StatusBadge.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { api } from '../../lib/api.js';
 import { printOrder } from '../../lib/printer.js';
-import { STATUS, formatDateTime, formatPrice, formatTime, nextStatus, timeAgo } from '../../lib/format.js';
+import { ALL_STATUS, STATUS, formatDateTime, formatPrice, formatTime, isClosed, nextStatus, timeAgo } from '../../lib/format.js';
 import { useAdmin } from './AdminLayout.jsx';
 
 const PERIODS = [
@@ -81,7 +81,7 @@ function OrderCard({ order, isNew, onAcknowledge, onChangeStatus, busy, now }) {
         <label className="select-inline">
           <span className="sr-only">Alterar status do pedido {order.number}</span>
           <select value={order.status} disabled={busy} onChange={(e) => onChangeStatus(order, e.target.value)}>
-            {STATUS.map((s) => (
+            {ALL_STATUS.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.label}
               </option>
@@ -200,7 +200,7 @@ export default function OrdersPage() {
   }, [fetchOrders]);
 
   const counts = useMemo(() => {
-    const result = Object.fromEntries(STATUS.map((s) => [s.id, 0]));
+    const result = Object.fromEntries(ALL_STATUS.map((s) => [s.id, 0]));
     for (const o of orders) result[o.status] += 1;
     return result;
   }, [orders]);
@@ -208,8 +208,8 @@ export default function OrdersPage() {
   const visible = useMemo(() => {
     const list = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
     // pedidos em aberto primeiro (mais antigos no topo, para não esquecer ninguém), finalizados depois
-    const open = list.filter((o) => o.status !== 'entregue').sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    const done = list.filter((o) => o.status === 'entregue');
+    const open = list.filter((o) => !isClosed(o.status)).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    const done = list.filter((o) => isClosed(o.status));
     return [...open, ...done];
   }, [orders, filter]);
 
@@ -222,6 +222,7 @@ export default function OrdersPage() {
 
   const changeStatus = async (order, status) => {
     if (status === order.status) return;
+    if (status === 'cancelado' && !window.confirm(`Cancelar o pedido #${order.number} da mesa ${order.tableNumber}? O cliente verá o pedido como cancelado.`)) return;
     setBusyId(order.id);
     acknowledge(order.id);
     try {
@@ -264,7 +265,7 @@ export default function OrdersPage() {
         <button type="button" role="tab" aria-selected={filter === 'all'} className="status-filter" onClick={() => setFilter('all')}>
           Todos <span>{orders.length}</span>
         </button>
-        {STATUS.map((s) => (
+        {ALL_STATUS.map((s) => (
           <button
             key={s.id}
             type="button"

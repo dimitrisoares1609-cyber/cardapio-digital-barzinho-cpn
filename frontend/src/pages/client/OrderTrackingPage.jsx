@@ -14,6 +14,7 @@ const MESSAGES = {
   em_preparo: 'Seu pedido está sendo preparado.',
   pronto: 'Seu pedido está pronto e já vai para a mesa.',
   entregue: 'Pedido entregue. Bom proveito!',
+  cancelado: 'Este pedido foi cancelado pelo bar. Se tiver dúvida, chame um atendente.',
 };
 
 /**
@@ -117,8 +118,9 @@ export default function OrderTrackingPage() {
         <span className={`live ${live ? 'live--on' : ''}`}>{live ? 'Ao vivo' : 'Reconectando...'}</span>
       </div>
 
-      <p className="tracking__message">{MESSAGES[order.status]}</p>
+      <p className={`tracking__message ${order.status === 'cancelado' ? 'tracking__message--cancel' : ''}`}>{MESSAGES[order.status]}</p>
 
+      {order.status !== 'cancelado' && (
       <ol className="steps" aria-label="Andamento do pedido">
         {STATUS.map((step, index) => {
           const Icon = ICONS[step.id];
@@ -134,6 +136,7 @@ export default function OrderTrackingPage() {
           );
         })}
       </ol>
+      )}
 
       <section className="tracking__items">
         <h2>Itens</h2>
