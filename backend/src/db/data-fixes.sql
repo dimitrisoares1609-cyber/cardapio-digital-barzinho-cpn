@@ -11,3 +11,16 @@ UPDATE menu_items SET price = 30, available = true, updated_at = now() WHERE nam
 -- Lanches sem carne não usam mais a ilustração de hambúrguer
 UPDATE menu_items SET image_url = '/seed-images/sanduiche.svg'
  WHERE name IN ('Pão com Ovo', 'Maneirinho') AND image_url = '/seed-images/lanche.svg';
+
+-- Preços das porções de torresmo confirmados pelo dono (24/11/2026)
+UPDATE menu_items SET price = 68, updated_at = now()
+ WHERE name = 'Torresmo' AND price = 64 AND category_id = (SELECT id FROM categories WHERE slug = 'porcoes');
+UPDATE menu_items SET price = 58, updated_at = now()
+ WHERE name = 'Torresmo com Mandioca' AND price = 57;
+
+-- "Uva" do refrigerante lata é a Fanta Uva
+UPDATE menu_items
+   SET short_description = 'Coca-Cola, Fanta, Fanta Uva, Schweppes ou Sprite.',
+       options = replace(options::text, '"name": "Uva"', '"name": "Fanta Uva"')::jsonb,
+       updated_at = now()
+ WHERE name = 'Refrigerante Lata 350 ml' AND short_description = 'Coca-Cola, Fanta, Uva, Schweppes ou Sprite.';

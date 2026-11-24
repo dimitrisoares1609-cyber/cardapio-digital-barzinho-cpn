@@ -106,12 +106,12 @@ const porcoes = [
     image: img('porcao'),
   },
   { name: 'Filé de Tilápia', shortDescription: 'Porção de filé de tilápia.', ingredients: 'Filé de tilápia', price: 68, image: img('peixe') },
-  { name: 'Torresmo', shortDescription: 'Porção de torresmo.', ingredients: 'Torresmo', price: 64, image: img('porcao') },
+  { name: 'Torresmo', shortDescription: 'Porção de torresmo.', ingredients: 'Torresmo', price: 68, image: img('porcao') },
   {
     name: 'Torresmo com Mandioca',
     shortDescription: 'Porção de torresmo acompanhada de mandioca.',
     ingredients: 'Torresmo, mandioca',
-    price: 57,
+    price: 58,
     image: img('porcao'),
   },
   { name: 'Batata Chips', shortDescription: 'Porção de batata chips.', ingredients: 'Batata', price: 25, image: img('batata') },
@@ -289,7 +289,7 @@ const lanches = [
 const refrigerantes = [
   {
     name: 'Refrigerante Lata 350 ml',
-    shortDescription: 'Coca-Cola, Fanta, Uva, Schweppes ou Sprite.',
+    shortDescription: 'Coca-Cola, Fanta, Fanta Uva, Schweppes ou Sprite.',
     price: 6,
     options: [
       {
@@ -297,8 +297,8 @@ const refrigerantes = [
         name: 'Sabor',
         type: 'single',
         required: true,
-        choices: ['Coca-Cola', 'Fanta', 'Uva', 'Schweppes', 'Sprite'].map((name) => ({
-          id: name.toLowerCase().replace(/[^a-z]/g, ''),
+        choices: ['Coca-Cola', 'Fanta', 'Fanta Uva', 'Schweppes', 'Sprite'].map((name) => ({
+          id: name === 'Fanta Uva' ? 'uva' : name.toLowerCase().replace(/[^a-z]/g, ''),
           name,
           priceDelta: 0,
         })),
