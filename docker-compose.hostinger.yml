@@ -1,0 +1,118 @@
+# Implantação pelo Gerenciador Docker da Hostinger ("Compose a partir de URL").
+# Não precisa clonar o repositório: o Docker baixa o código direto do GitHub para montar as imagens.
+#
+#   secrets → na primeira vez gera senhas aleatórias (banco, JWT, painel) num volume privado
+#   caddy   → HTTPS automático (Let's Encrypt) para os endereços em SITE_ADDRESSES
+#   web     → nginx com o front React + proxy da API/WebSocket
+#   api     → API REST + Socket.IO
+#   db      → PostgreSQL (sem porta exposta)
+#
+# A senha do painel (/admin) aparece no log do container "api" ao iniciar.
+
+
+services:
+  secrets:
+    image: alpine:3.20
+    restart: "no"
+    command:
+      - sh
+      - -c
+      - |
+        for f in pg jwt admin; do
+          [ -s /secrets/$$f ] || head -c 64 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24 > /secrets/$$f
+        done
+        chmod 644 /secrets/*
+    volumes:
+      - secrets:/secrets
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      secrets:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /secrets/pg
+      POSTGRES_DB: cardapio
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - secrets:/secrets:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cardapio"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build:
+      context: https://github.com/dimitrisoares1609-cyber/cardapio-digital-barzinho-cpn.git#main:backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3333
+      PUBLIC_URL: https://barcpn.tech
+      MEDIA_BASE_URL: ""
+      CORS_ORIGINS: https://barcpn.tech,https://www.barcpn.tech,https://srv2195460.hstgr.cloud
+      TRUST_PROXY: 2
+      JWT_EXPIRES_IN: 12h
+      ADMIN_NAME: Administrador
+      ADMIN_EMAIL: admin@barzinhocpn.com.br
+      STORAGE_DRIVER: local
+    command:
+      - sh
+      - -c
+      - |
+        export JWT_SECRET="$$(cat /secrets/jwt)"
+        export ADMIN_PASSWORD="$$(cat /secrets/admin)"
+        export DATABASE_URL="postgres://postgres:$$(cat /secrets/pg)@db:5432/cardapio"
+        node src/db/migrate.js && node src/db/seed.js || exit 1
+        echo "=============================================="
+        echo " Painel: /admin   login: $$ADMIN_EMAIL"
+        echo " Senha do painel: $$ADMIN_PASSWORD"
+        echo "=============================================="
+        exec node src/server.js
+    volumes:
+      - uploads:/app/uploads
+      - secrets:/secrets:ro
+
+  web:
+    build:
+      context: https://github.com/dimitrisoares1609-cyber/cardapio-digital-barzinho-cpn.git#main:frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+configs:
+  caddyfile:
+    content: |
+      srv2195460.hstgr.cloud, barcpn.tech, www.barcpn.tech {
+      	encode zstd gzip
+      	reverse_proxy web:80
+      }
+
+volumes:
+  pgdata:
+  uploads:
+  secrets:
+  caddy_data:
+  caddy_config:
