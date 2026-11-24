@@ -8,6 +8,7 @@
 #   db      → PostgreSQL (sem porta exposta)
 #
 # A senha do painel (/admin) aparece no log do container "api" ao iniciar.
+# Para publicar uma versão nova: suba o código no GitHub, troque a tag das imagens (v2 → v3) e reimplante.
 
 
 services:
@@ -45,6 +46,7 @@ services:
       retries: 30
 
   api:
+    image: barcpn-api:v2
     build:
       context: https://github.com/dimitrisoares1609-cyber/cardapio-digital-barzinho-cpn.git#main:backend
     restart: unless-stopped
@@ -80,6 +82,7 @@ services:
       - secrets:/secrets:ro
 
   web:
+    image: barcpn-web:v2
     build:
       context: https://github.com/dimitrisoares1609-cyber/cardapio-digital-barzinho-cpn.git#main:frontend
     restart: unless-stopped
@@ -106,8 +109,8 @@ configs:
   caddyfile:
     content: |
       srv2195460.hstgr.cloud, barcpn.tech, www.barcpn.tech {
-      	encode zstd gzip
-      	reverse_proxy web:80
+        encode zstd gzip
+        reverse_proxy web:80
       }
 
 volumes:
