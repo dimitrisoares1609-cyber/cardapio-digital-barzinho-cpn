@@ -8,6 +8,8 @@ const dir = path.dirname(fileURLToPath(import.meta.url));
 export async function migrate() {
   const sql = await readFile(path.join(dir, 'schema.sql'), 'utf8');
   await pool.query(sql);
+  const fixes = await readFile(path.join(dir, 'data-fixes.sql'), 'utf8');
+  await pool.query(fixes);
 }
 
 // Permite rodar direto: npm run db:migrate

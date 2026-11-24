@@ -1,3 +1,4 @@
+import { useTitle } from '../../lib/useTitle.js';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, QrCode, ShoppingBag, TriangleAlert } from 'lucide-react';
@@ -26,6 +27,7 @@ function validate({ name, table }) {
  * ajuste/remoção de itens, dados do cliente e envio via HTTP POST.
  */
 export default function CartPage() {
+  useTitle('Seu pedido');
   const { lines, total, customer, setCustomer, setQuantity, remove, clear, reprice } = useCart();
   // Pedido só sai com o código do QR da mesa, lido nas últimas horas
   const hasQr = !!customer.tableToken && Date.now() - (customer.tableAt || 0) < TABLE_QR_TTL;
@@ -105,6 +107,7 @@ export default function CartPage() {
   if (lines.length === 0) {
     return (
       <div className="page">
+        <h1 className="sr-only">Seu pedido</h1>
         <EmptyState
           icon={ShoppingBag}
           title="Seu pedido está vazio"

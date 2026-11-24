@@ -1,3 +1,4 @@
+import { useTitle } from '../../lib/useTitle.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, RefreshCw, Search, SearchX, X } from 'lucide-react';
@@ -46,6 +47,7 @@ function SectionTitle({ children }) {
 }
 
 export default function MenuPage() {
+  useTitle(null);
   const { categories, loading, error, reload } = useMenu();
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState('');
@@ -108,8 +110,19 @@ export default function MenuPage() {
     );
   }
 
+  const onTabKey = (e, index) => {
+    const keys = { ArrowRight: 1, ArrowLeft: -1, Home: -Infinity, End: Infinity };
+    if (!(e.key in keys)) return;
+    e.preventDefault();
+    const step = keys[e.key];
+    const next = Number.isFinite(step) ? (index + step + categories.length) % categories.length : step < 0 ? 0 : categories.length - 1;
+    selectCategory(categories[next].slug);
+    tabsRef.current?.querySelectorAll('[role="tab"]')[next]?.focus();
+  };
+
   return (
     <div className="menu">
+      <h1 className="sr-only">Cardápio do Barzinho CPN</h1>
       <div className="menu-toolbar">
         <label className="search">
           <Search size={18} aria-hidden="true" />
@@ -128,14 +141,16 @@ export default function MenuPage() {
         </label>
 
         <div className="tabs" role="tablist" aria-label="Categorias" ref={tabsRef}>
-          {categories.map((c) => (
+          {categories.map((c, index) => (
             <button
               key={c.id}
               type="button"
               role="tab"
               aria-selected={!results && c.slug === active?.slug}
+              tabIndex={c.slug === active?.slug ? 0 : -1}
               className="tab"
               onClick={() => selectCategory(c.slug)}
+              onKeyDown={(e) => onTabKey(e, index)}
             >
               {c.name}
             </button>

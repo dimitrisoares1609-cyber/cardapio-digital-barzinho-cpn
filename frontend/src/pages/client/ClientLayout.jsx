@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ReceiptText, ShoppingBag } from 'lucide-react';
 import Brand from '../../components/Brand.jsx';
-import { useCart } from '../../context/CartContext.jsx';
+import { TABLE_QR_TTL, useCart } from '../../context/CartContext.jsx';
 import { formatPrice } from '../../lib/format.js';
 
 export default function ClientLayout() {
@@ -37,6 +37,8 @@ export default function ClientLayout() {
   }, [count]);
 
   const onMenu = location.pathname === '/';
+  // O selo da mesa só aparece depois de ler o QR code da plaquinha
+  const hasQr = !!customer.table && !!customer.tableToken && Date.now() - (customer.tableAt || 0) < TABLE_QR_TTL;
   const showCartBar = count > 0 && onMenu;
 
   return (
@@ -56,7 +58,7 @@ export default function ClientLayout() {
             </Link>
           </nav>
         </div>
-        {customer.table && onMenu && <div className="table-chip">Mesa {customer.table}</div>}
+        {hasQr && onMenu && <div className="table-chip">Mesa {customer.table}</div>}
       </header>
 
       <main className="client-main">

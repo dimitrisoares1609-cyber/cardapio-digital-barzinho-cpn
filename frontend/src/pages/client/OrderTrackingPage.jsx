@@ -1,3 +1,4 @@
+import { useTitle } from '../../lib/useTitle.js';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { ChefHat, CircleCheck, HandPlatter, Inbox, PackageCheck, SearchX } from 'lucide-react';
@@ -26,6 +27,7 @@ export default function OrderTrackingPage() {
   const location = useLocation();
   const toast = useToast();
   const [order, setOrder] = useState(null);
+  useTitle(order ? `Pedido #${order.number}` : 'Pedido');
   const [error, setError] = useState(null);
   const [live, setLive] = useState(false);
 
@@ -111,7 +113,7 @@ export default function OrderTrackingPage() {
 
       <div className="tracking__header">
         <p className="tracking__label">Pedido</p>
-        <p className="tracking__number">#{order.number}</p>
+        <h1 className="tracking__number">#{order.number}</h1>
         <p className="tracking__meta">
           Mesa {order.tableNumber} · {order.customerName} · {formatTime(order.createdAt)}
         </p>

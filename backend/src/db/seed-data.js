@@ -1,5 +1,5 @@
 // Cardápio do Barzinho CPN, digitado a partir do cardápio físico do bar.
-// Itens que estavam sem preço no cardápio impresso entram como indisponíveis (preço 0)
+// Itens sem preço no cardápio impresso entram como indisponíveis (preço 0); preços informados pelo dono depois
 // para o administrador completar pelo painel.
 
 const img = (name) => `/seed-images/${name}.svg`;
@@ -74,8 +74,7 @@ const porcoes = [
     name: 'Tilápia Recheada',
     shortDescription: 'Recheada com palmito, mussarela e catupiri.',
     ingredients: 'Tilápia, palmito, mussarela, catupiri',
-    price: 0,
-    available: false,
+    price: 80,
     image: img('peixe'),
   },
   {
@@ -115,7 +114,7 @@ const porcoes = [
     price: 57,
     image: img('porcao'),
   },
-  { name: 'Batata Chips', shortDescription: 'Porção de batata chips.', ingredients: 'Batata', price: 0, available: false, image: img('batata') },
+  { name: 'Batata Chips', shortDescription: 'Porção de batata chips.', ingredients: 'Batata', price: 25, image: img('batata') },
   { name: 'Batata Simples', shortDescription: 'Porção de batata frita.', ingredients: 'Batata frita', price: 30, image: img('batata') },
   {
     name: 'Batata com Queijo',
@@ -135,8 +134,7 @@ const porcoes = [
     name: 'Camarão',
     shortDescription: 'Camarão empanado com catupiri.',
     ingredients: 'Camarão empanado, catupiri',
-    price: 0,
-    available: false,
+    price: 45,
     image: img('porcao'),
   },
   {
@@ -180,7 +178,7 @@ const porcoes = [
       },
     ],
   },
-  { name: 'Joelho de Porco', shortDescription: 'Porção de joelho de porco.', price: 0, available: false, image: img('porcao') },
+  { name: 'Joelho de Porco', shortDescription: 'Porção de joelho de porco.', price: 40, image: img('porcao') },
   { name: 'Tropeiro', shortDescription: 'Porção de feijão tropeiro.', price: 32, image: img('porcao') },
   { name: 'Moela', shortDescription: 'Porção de moela.', ingredients: 'Moela de frango', price: 32, image: img('porcao') },
   {
@@ -190,7 +188,7 @@ const porcoes = [
     price: 32,
     image: img('porcao'),
   },
-  { name: 'Pé de Porco', shortDescription: 'Porção de pé de porco.', price: 0, available: false, image: img('porcao') },
+  { name: 'Pé de Porco', shortDescription: 'Porção de pé de porco.', price: 30, image: img('porcao') },
   { name: 'Mandioca Frita', shortDescription: 'Porção de mandioca frita.', ingredients: 'Mandioca', price: 25, image: img('batata') },
 ].map((item) => ({ category: 'porcoes', ...item }));
 
@@ -274,7 +272,7 @@ const lanches = [
     shortDescription: 'Queijo, tomate, ovo e alface.',
     ingredients: 'Pão, queijo, tomate, ovo, alface',
     price: 20,
-    image: img('lanche'),
+    image: img('sanduiche'),
   },
   {
     category: 'lanches',
@@ -282,7 +280,7 @@ const lanches = [
     shortDescription: 'Sanduíche de pão com ovo.',
     ingredients: 'Pão, ovo',
     price: 13,
-    image: img('lanche'),
+    image: img('sanduiche'),
   },
 ];
 

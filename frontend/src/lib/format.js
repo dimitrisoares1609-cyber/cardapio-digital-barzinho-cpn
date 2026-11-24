@@ -4,7 +4,8 @@ const dateTime = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-di
 
 export const formatPrice = (value) => money.format(Number(value) || 0);
 export const formatTime = (iso) => time.format(new Date(iso));
-export const formatDateTime = (iso) => dateTime.format(new Date(iso));
+const dateTimeYear = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+export const formatDateTime = (iso, { withYear = false } = {}) => (withYear ? dateTimeYear : dateTime).format(new Date(iso));
 
 export function timeAgo(iso, now = Date.now()) {
   const minutes = Math.floor((now - new Date(iso).getTime()) / 60000);

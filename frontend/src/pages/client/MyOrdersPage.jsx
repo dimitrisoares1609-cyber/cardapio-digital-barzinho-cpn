@@ -1,3 +1,4 @@
+import { useTitle } from '../../lib/useTitle.js';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ReceiptText } from 'lucide-react';
@@ -10,6 +11,7 @@ import { MY_ORDERS_KEY } from './CartPage.jsx';
 
 // Pedidos feitos neste aparelho (os códigos ficam salvos no navegador)
 export default function MyOrdersPage() {
+  useTitle('Meus pedidos');
   const [orders] = useState(() => load(MY_ORDERS_KEY, []));
   const [statuses, setStatuses] = useState({});
 
@@ -41,7 +43,7 @@ export default function MyOrdersPage() {
               <Link to={`/pedido/${o.code}`} className="my-order">
                 <span className="my-order__number">#{o.number}</span>
                 <span className="my-order__info">
-                  <span>{formatDateTime(o.createdAt)}</span>
+                  <span>{formatDateTime(o.createdAt, { withYear: new Date(o.createdAt).getFullYear() !== new Date().getFullYear() })}</span>
                   <strong>{formatPrice(o.total)}</strong>
                 </span>
                 {statuses[o.code] && <StatusBadge status={statuses[o.code]} />}

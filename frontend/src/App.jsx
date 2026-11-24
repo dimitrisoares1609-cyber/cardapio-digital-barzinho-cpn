@@ -1,4 +1,7 @@
 import { Link, Route, Routes } from 'react-router-dom';
+import { MapPinOff } from 'lucide-react';
+import EmptyState from './components/EmptyState.jsx';
+import { useTitle } from './lib/useTitle.js';
 import { MenuProvider } from './context/MenuContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import ClientLayout from './pages/client/ClientLayout.jsx';
@@ -14,12 +17,21 @@ import CategoriesPage from './pages/admin/CategoriesPage.jsx';
 import TablesPage from './pages/admin/TablesPage.jsx';
 
 function NotFound() {
+  useTitle('Página não encontrada');
   return (
-    <div className="page empty">
-      <h3>Página não encontrada</h3>
-      <Link to="/" className="btn btn--primary">
-        Ir para o cardápio
-      </Link>
+    <div className="page">
+      <h1 className="sr-only">Página não encontrada</h1>
+      <EmptyState
+        icon={MapPinOff}
+        title="Página não encontrada"
+        action={
+          <Link to="/" className="btn btn--primary">
+            Ir para o cardápio
+          </Link>
+        }
+      >
+        O endereço pode estar errado ou a página foi removida.
+      </EmptyState>
     </div>
   );
 }
@@ -39,6 +51,7 @@ export default function App() {
         <Route path="carrinho" element={<CartPage />} />
         <Route path="pedido/:code" element={<OrderTrackingPage />} />
         <Route path="meus-pedidos" element={<MyOrdersPage />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       {/* Módulo administração */}
@@ -57,7 +70,6 @@ export default function App() {
         <Route path="mesas" element={<TablesPage />} />
       </Route>
 
-      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
