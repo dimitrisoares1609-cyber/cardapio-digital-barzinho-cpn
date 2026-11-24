@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { BookOpen, LayoutGrid, ListOrdered, LogOut, Tags, Volume2, VolumeX } from 'lucide-react';
+import { BookOpen, LayoutGrid, ListOrdered, LogOut, Printer, Tags, Volume2, VolumeX } from 'lucide-react';
 import Brand from '../../components/Brand.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-import { API_URL } from '../../lib/api.js';
+import { API_URL, api } from '../../lib/api.js';
+import { getPrinterSettings, printOrder, wasPrinted } from '../../lib/printer.js';
+import PrinterSettingsModal from './PrinterSettingsModal.jsx';
 import { createAdminSocket } from '../../lib/socket.js';
 import { playNewOrderSound } from '../../lib/sound.js';
 import { load, save } from '../../lib/storage.js';
@@ -24,7 +26,11 @@ export default function AdminLayout() {
   const [connected, setConnected] = useState(false);
   const [soundOn, setSoundOn] = useState(() => load('barzinho:som', true));
   const [unseen, setUnseen] = useState(0);
+  const [printer, setPrinter] = useState(getPrinterSettings);
+  const [printerOpen, setPrinterOpen] = useState(false);
   const soundRef = useRef(soundOn);
+  const printerRef = useRef(printer);
+  printerRef.current = printer;
   const onOrdersPage = location.pathname === '/admin';
   const onOrdersRef = useRef(onOrdersPage);
 
@@ -34,12 +40,37 @@ export default function AdminLayout() {
   useEffect(() => {
     const s = createAdminSocket(token);
     setSocket(s);
-    s.on('connect', () => setConnected(true));
+    // Impressão automática: só imprime pedidos que este computador ainda não imprimiu
+    const autoPrint = (order) => {
+      const cfg = printerRef.current;
+      if (!cfg.auto || wasPrinted(order.id)) return;
+      if (cfg.enabledAt && new Date(order.createdAt) < new Date(cfg.enabledAt)) return;
+      printOrder(order);
+    };
+    // Ao (re)conectar, imprime pedidos recebidos nos últimos 20 min que ficaram para trás
+    // (ex.: internet caiu ou o computador foi reiniciado)
+    const catchUp = async () => {
+      if (!printerRef.current.auto) return;
+      try {
+        const data = await api('/api/orders?period=today&status=recebido&limit=50', { auth: true });
+        data.orders
+          .filter((o) => o.status === 'recebido' && Date.now() - new Date(o.createdAt) < 20 * 60000)
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+          .forEach(autoPrint);
+      } catch {
+        /* tenta de novo na próxima reconexão */
+      }
+    };
+    s.on('connect', () => {
+      setConnected(true);
+      catchUp();
+    });
     s.on('disconnect', () => setConnected(false));
     s.on('connect_error', () => setConnected(false));
     s.on('order:created', (order) => {
       if (soundRef.current) playNewOrderSound();
       toast.show(`Novo pedido #${order.number} · Mesa ${order.tableNumber}`, { type: 'info', duration: 6000 });
+      autoPrint(order);
       if (!onOrdersRef.current || document.hidden) setUnseen((n) => n + 1);
     });
     return () => s.close();
@@ -68,7 +99,7 @@ export default function AdminLayout() {
     if (next) playNewOrderSound();
   };
 
-  const value = useMemo(() => ({ socket, connected }), [socket, connected]);
+  const value = useMemo(() => ({ socket, connected, printer }), [socket, connected, printer]);
 
   return (
     <AdminContext.Provider value={value}>
@@ -96,6 +127,15 @@ export default function AdminLayout() {
             <span className={`live ${connected ? 'live--on' : ''}`} title={connected ? 'Recebendo pedidos em tempo real' : 'Sem conexão em tempo real'}>
               {connected ? 'Ao vivo' : 'Offline'}
             </span>
+            <button
+              type="button"
+              className={`icon-btn icon-btn--light ${printer.auto ? 'icon-btn--active' : ''}`}
+              onClick={() => setPrinterOpen(true)}
+              aria-label="Impressora"
+              title={printer.auto ? 'Impressão automática ligada' : 'Impressão automática desligada'}
+            >
+              <Printer size={20} />
+            </button>
             <button type="button" className="icon-btn icon-btn--light" onClick={toggleSound} aria-label={soundOn ? 'Desativar som' : 'Ativar som'} title={soundOn ? 'Som ligado' : 'Som desligado'}>
               {soundOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
@@ -110,6 +150,7 @@ export default function AdminLayout() {
         <main className="admin-main">
           <Outlet />
         </main>
+        <PrinterSettingsModal open={printerOpen} onClose={() => setPrinterOpen(false)} settings={printer} onChange={setPrinter} />
       </div>
     </AdminContext.Provider>
   );

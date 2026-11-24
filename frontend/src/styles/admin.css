@@ -801,3 +801,47 @@
     flex: 0 0 auto;
   }
 }
+
+/* Impressora de pedidos */
+.admin-header .icon-btn--active {
+  color: #8ff0ae;
+}
+
+.printer-settings {
+  display: grid;
+  gap: 14px;
+}
+
+.printer-settings .small {
+  font-size: 0.85rem;
+  margin-top: -6px;
+}
+
+.printer-settings__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.printer-settings__help {
+  font-size: 0.9rem;
+  border-top: 1px solid rgb(0 0 0 / 0.08);
+  padding-top: 10px;
+}
+
+.printer-settings__help summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.printer-settings__help ol {
+  margin: 8px 0 0 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.printer-settings__help code {
+  background: rgb(0 0 0 / 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+}

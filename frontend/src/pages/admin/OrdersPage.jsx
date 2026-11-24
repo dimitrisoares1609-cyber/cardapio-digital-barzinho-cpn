@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Clock, History, Inbox, MessageSquareText, RefreshCw } from 'lucide-react';
+import { ChevronDown, Clock, History, Inbox, MessageSquareText, Printer, RefreshCw } from 'lucide-react';
 import EmptyState from '../../components/EmptyState.jsx';
 import Spinner from '../../components/Spinner.jsx';
 import StatusBadge from '../../components/StatusBadge.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { api } from '../../lib/api.js';
+import { printOrder } from '../../lib/printer.js';
 import { STATUS, formatDateTime, formatPrice, formatTime, nextStatus, timeAgo } from '../../lib/format.js';
 import { useAdmin } from './AdminLayout.jsx';
 
@@ -98,6 +99,17 @@ function OrderCard({ order, isNew, onAcknowledge, onChangeStatus, busy, now }) {
           aria-expanded={showHistory}
         >
           <History size={16} /> Histórico
+        </button>
+        <button
+          type="button"
+          className="btn btn--ghost btn--sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            printOrder(order, { reprint: true });
+          }}
+          aria-label={`Imprimir pedido ${order.number}`}
+        >
+          <Printer size={16} /> Imprimir
         </button>
       </div>
 
